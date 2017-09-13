@@ -1,0 +1,9 @@
+[submodule "asadbg"]
+	path = asadbg
+	url = https://github.com/nccgroup/asadbg.git
+[submodule "asafw"]
+	path = asafw
+	url = https://github.com/nccgroup/asafw.git
+[submodule "idahunt"]
+	path = idahunt
+	url = https://github.com/nccgroup/idahunt.git
