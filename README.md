@@ -36,3 +36,6 @@ Refer to the respective sub-projects for their documentation:
 
 You can also refer to this [tutorial](tutorial.md) for a way to setup your own
 virtualised Cisco ASA in GNS3 that you can debug with the tools above.
+
+A series of blog posts has also been published 
+[here](https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2017/september/cisco-asa-series-part-one-intro-to-the-cisco-asa/).
