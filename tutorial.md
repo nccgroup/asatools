@@ -295,7 +295,7 @@ We do the initial analysis:
 
 ```
 C:\idahunt>idahunt.py --verbose --inputdir "C:\linabins" --analyse --filter "filters\ciscoasa.py -m 9815
--a gns3"
+-a asav"
 [idahunt] IDA32 = C:\Program Files (x86)\IDA 6.95\idaq.exe
 [idahunt] IDA64 = C:\Program Files (x86)\IDA 6.95\idaq64.exe
 [idahunt] ANALYSING FILES
@@ -307,7 +307,7 @@ C:\idahunt>idahunt.py --verbose --inputdir "C:\linabins" --analyse --filter "fil
 We rename stuff in IDA:
 
 ```
-C:\idahunt>idahunt.py --verbose --inputdir "C:\linabins" --scripts C:\asadbg\asadbg_rename.py --filter "filters\ciscoasa.py -m 9815 -a gns3"
+C:\idahunt>idahunt.py --verbose --inputdir "C:\linabins" --scripts C:\asadbg\asadbg_rename.py --filter "filters\ciscoasa.py -m 9815 -a asav"
 [idahunt] IDA32 = C:\Program Files (x86)\IDA 6.95\idaq.exe
 [idahunt] IDA64 = C:\Program Files (x86)\IDA 6.95\idaq64.exe
 [idahunt] EXECUTE SCRIPTS
@@ -319,7 +319,7 @@ C:\idahunt>idahunt.py --verbose --inputdir "C:\linabins" --scripts C:\asadbg\asa
 We import the symbols in our database:
 
 ```
-C:\idahunt>idahunt.py --verbose --inputdir "C:\linabins" --scripts C:\asadbg\asadbg_hunt.py --filter "filters\ciscoasa.py -m 9815 -a gns3"
+C:\idahunt>idahunt.py --verbose --inputdir "C:\linabins" --scripts C:\asadbg\asadbg_hunt.py --filter "filters\ciscoasa.py -m 9815 -a asav"
 [idahunt] IDA32 = C:\Program Files (x86)\IDA 6.95\idaq.exe
 [idahunt] IDA64 = C:\Program Files (x86)\IDA 6.95\idaq64.exe
 [idahunt] EXECUTE SCRIPTS
