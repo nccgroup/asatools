@@ -1,31 +1,98 @@
 # Configuring a Cisco ASA test environment from ground zero
 
+## Introduction
+
 Sometimes, it is good to setup your own Cisco ASA environment so you can test 
 your tools and compare the results with what you have in the wild. We describe 
 here a way to setup it using GNS3 which is the standard way for creating virtual
 networks with Cisco devices.
 
-The installation of GNS3 is straightforward. You need to register on 
-[GNS3 website](https://www.gns3.com/) in order to be able to [download the 
-installer](https://www.gns3.com/software/download/windows). We used 
-`GNS3-1.5.1-all-in-one.exe` in this tutorial but you can use any newer version.
-It is free and you only need to register. There is nothing special to do during 
-installation.
-
-We detail the procedure using a Windows host and a Linux VM/VMWare and
-ASAv 9.8.1(5). We do the following steps:
+We detail the following steps:
 
 * GNS3 emulator setup
 * New ASA internal configuration using CLI
 * Importing symbols for new target
 * Enabling gdb and debugging
 
-It should work with any other `asav*.qcow2` as well as with a Linux host only
-or using VirtualBox or other Virtual Machine software though you may need to 
-tweak things for having a working network.
+It should work with any `asav*.qcow2`.
 
 We download `asav981-5.qcow2` from the Internet (Cisco official website or 
 Google for it). We check its MD5 against Cisco website (if needed).
+
+We detail below how to configure the environment for:
+
+* GNS3 on a Windows host and linked to a Linux VM/VMWare
+* GNS3 installed on Linux and linked to the Linux machine (host or VM)
+
+Each time there is something specific to one of the configuration, we detail
+both so feel free to skip what does not matter for you.
+
+It could be adapted to work using VirtualBox or other Virtual Machine software
+though you may need to tweak things for having a working network.
+
+## GNS3 installation 
+
+### Installation on Linux
+
+Note: If you run it in VMWare, you need to enable virtualization support so KVM works.
+You can do it by going to `VM > Settings`, then in Processors, 
+tick `Virtualize Intel VT-x/EPT or AMD-V/RVI`. Your processor needs to support VT-x/AMD-v
+and it needs to be enabled in your BIOS.
+
+The installation of GNS3 is straightforward. You need to follow [https://docs.gns3.com/1QXVIihk7dsOL7Xr7Bmz4zRzTsJ02wklfImGuHwTlaA4/index.html].
+
+We use Ubuntu 18.04 LTS and just do:
+
+```
+sudo add-apt-repository ppa:gns3/ppa
+sudo apt-get update
+sudo apt-get install gns3-gui
+```
+
+After installation, your should have:
+
+```
+$ gns3 --version
+2.1.5
+```
+
+Note: we run `gns3` as root as it is required for loading KVM atm.
+
+After executing `gns3`, you are asked to choose a server type. We choose 
+`Run the topologies on my computer`.
+
+We leave the default local server configuration:
+
+```
+* Server path: /usr/bin/gns3server
+* Host binding: 127.0.0.1
+* Port: 3080 TCP
+```
+
+We also install VNC viewer by downloading `VNC-Viewer-6.17.1113-Linux-x64.deb` from
+`https://www.realvnc.com/download/file/viewer.files/`.
+
+Now you should restart your Linux session. This is so uBridge is available. Otherwise,
+you'll get an error message later when starting the virtualised ASA:
+
+`uBridge is not available, path doesn't exist, or you just installed GNS3 and need to restart
+your user session to refresh user permissions`
+
+### Installation on Windows
+
+We detail the procedure using a Windows host and a Linux VM/VMWare and
+ASAv 9.8.1(5). 
+
+The installation of GNS3 is straightforward. We used 
+`GNS3-2.1.5-all-in-one.exe` in this tutorial but you can use any newer version.
+It can be downloaded from [https://github.com/GNS3/gns3-gui/releases/tag/v2.1.5].
+You also need to download `GNS3.VM.VMware.Workstation.2.1.5.zip` which is a VM
+to run the qemu instances.
+It is free and you only need to register. There is nothing special to do during 
+installation.
+
+After executing GNS3, you are asked to choose a server type. We choose 
+`Run the topologies in an isolated and standard VM`.
 
 ## Create an ASA firewall in GNS3
 
@@ -45,6 +112,12 @@ Then you specify the path to QEMU:
 Qemu binary: C:\program files\GNS3\qemu-2.4.0\qemu-system-x86_64w.exe (v2.4.0) 
 (the 64-bit version should already be selected)
 RAM: 2048 MB (The ASA may crash at boot if you only assign 1024MB, see section later)
+```
+
+Then you specify the console type:
+
+```
+telnet
 ```
 
 Then you specify the disk image (equivalent of the CF card with a real 
@@ -83,6 +156,10 @@ And untick "Use as a linked base VM"
 
 You should now have your ASA created :)
 
+Note: If you are wondering if we could have used `vnc` above instead of `telnet` and then 
+have left `-nographic` here, the reason we don't do it is that then we would not be able 
+to use the telnet port to connect to `gdbserver` on the serial.
+
 ## Create the network and start the firewall
 
 You can now drop as many ASA firewalls as you want in the GNS3 environment. 
@@ -94,8 +171,8 @@ A right click on the newly firewall instance gives us some options:
 
 ```
 configure: shows all the options we already defined. For now we keep going
-Start: starts the firewall as if we unplug/replug the firewall.
-Console: starts a console as if we use a serial cable with a real firewall. This console does not seem to work actually. That is why we removed "-nographic" previously.
+Start: starts the firewall as if we unplug/replug the firewall
+Console: open a console as if we use a serial cable with a real firewall. Does not apply to us as we removed `-nographic`. The console will automatically open when we start the firewall and closing the console will switch off the firewall too
 ```
 
 Let's start the firewall with "Start". You should get GNU GRUB asking you to 
@@ -148,8 +225,94 @@ Note that for GNS3, the "GigabitEthernet 0/0" interface is interface 1 and
 
 ## Connect the router to your host / VM
 
-Now close the qemu window. It stops the ASA firewall. You can create a network 
-between your host or VM in GNS3. You can use the virtual network editor 
+Now close the qemu window. It stops the ASA firewall. 
+
+### Linux network setup
+
+We first close GNS3. We then use the `build_linux_bridge.sh` script to setup 
+a network.
+
+```
+# ./build_linux_bridge.sh
+Loading tun module
+Loading dummy module
+Creating dummy interface
+RTNETLINK answers: File exists
+Creating tap device tap2
+Set 'tap2' persistent and owned by uid 0
+Creating bridge device br0
+bridge name	bridge id		STP enabled	interfaces
+br0		8000.000000000000	no		
+Assocating eno2 and tap2 to br0
+Bringing up bridge
+Setting br0 addr to 192.168.100.1/24
+Setting eno2 addr to 192.168.100.254/24
+Setting default route
+RTNETLINK answers: File exists
+All done.
+You can tear the network down by calling this script with --kill
+```
+
+`br0` is the bridged interface used by the Linux machine.
+
+```
+# ifconfig br0 eno2
+br0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.100.1  netmask 255.255.255.0  broadcast 192.168.100.255
+        inet6 fe80::2c94:cbff:fe54:ba35  prefixlen 64  scopeid 0x20<link>
+        ether 2e:94:cb:54:ba:35  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 47  bytes 7149 (7.1 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+eno2: flags=451<UP,BROADCAST,RUNNING,NOARP,PROMISC>  mtu 1500
+        inet 192.168.100.254  netmask 255.255.255.0  broadcast 0.0.0.0
+        inet6 fe80::2c94:cbff:fe54:ba35  prefixlen 64  scopeid 0x20<link>
+        ether 2e:94:cb:54:ba:35  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 52  bytes 7499 (7.4 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+```
+
+Now we restart GNS3 and load our project with ASA device. We add a "Cloud".
+
+We right click on the "Cloud" and click "Configure". In "Ethernet interfaces",
+we select `br0` and click "Add". Then we click "OK".
+
+Now we add a link between the ASA and the cloud i.e. from "Ethernet 1" on the
+ASA to "br0" on the cloud. Indeed "Ethernet 0" is the management interface.
+
+Now we should be able to ping the Linux machine "192.168.100.1" from the ASA 
+and ping the ASA "192.168.100.99" from the Linux host.
+
+You should also be able to connect using SSH from the Linux host to the GNS3 
+ASA firewall.
+
+To locate the telnet port (that we will use later to connect asadbg/gdb to),
+you can't reply on the one specified in the qemu command line (using
+for instance `ps aux | grep qemu | grep serial`). Instead you can find it
+in the GNS3 project.
+
+It is 5003 instead as found in the .gns3 project (usually in 
+`/home/<user>/GNS3/projects/<project_name>/<project_name>.gns3`):
+
+```
+{
+    "compute_id": "local",
+    "console": 5003,
+    "console_type": "telnet",
+    ...
+    "name": "ASAv9627-1",
+```
+
+Here it is `5003`.
+
+### Windows network setup
+
+You can create a network between your Windows host and your Linux VM in GNS3. 
+You can use the virtual network editor 
 in VMWare to create a custom network (such as VMnet2 which is not used by 
 default), setup a static IP for your VM and use this one in GNS3.
 
@@ -386,16 +549,20 @@ After booting the emulator, we get the following:
 
 ## Debugging
 
-To debug, we define add this to `asadbg.cfg`:
+To debug, we add this to `asadbg.cfg`:
 
 ```
 [asav9815]
 version=9815
 arch=gns3
 rootfs_path=/home/user/fw/_asav981-5.qcow2.extracted/rootfs
+gns3_host=192.168.5.1
 gns3_port=12004
 attach_gdb=yes
 ```
+
+Note: for working with the Linux environment, we would need to use `gns3_host=127.0.0.1` 
+and `gns3_port=5003` to match the configuration done above.
 
 Now we can debug it:
 
