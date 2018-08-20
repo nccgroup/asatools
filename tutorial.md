@@ -39,7 +39,7 @@ You can do it by going to `VM > Settings`, then in Processors,
 tick `Virtualize Intel VT-x/EPT or AMD-V/RVI`. Your processor needs to support VT-x/AMD-v
 and it needs to be enabled in your BIOS.
 
-The installation of GNS3 is straightforward. You need to follow [https://docs.gns3.com/1QXVIihk7dsOL7Xr7Bmz4zRzTsJ02wklfImGuHwTlaA4/index.html].
+The installation of GNS3 is straightforward. It is described [here](https://docs.gns3.com/1QXVIihk7dsOL7Xr7Bmz4zRzTsJ02wklfImGuHwTlaA4/index.html).
 
 We use Ubuntu 18.04 LTS and just do:
 
@@ -69,8 +69,8 @@ We leave the default local server configuration:
 * Port: 3080 TCP
 ```
 
-We also install VNC viewer by downloading `VNC-Viewer-6.17.1113-Linux-x64.deb` from
-`https://www.realvnc.com/download/file/viewer.files/`.
+We also install VNC viewer by downloading `VNC-Server-6.3.1-Linux-x64.deb` from
+[here](https://www.realvnc.com/en/connect/download/vnc/linux/).
 
 Now you should restart your Linux session. This is so uBridge is available. Otherwise,
 you'll get an error message later when starting the virtualised ASA:
@@ -85,7 +85,7 @@ ASAv 9.8.1(5).
 
 The installation of GNS3 is straightforward. We used
 `GNS3-2.1.5-all-in-one.exe` in this tutorial but you can use any newer version.
-It can be downloaded from [https://github.com/GNS3/gns3-gui/releases/tag/v2.1.5].
+It can be downloaded from [here](https://github.com/GNS3/gns3-gui/releases/tag/v2.1.5).
 You also need to download `GNS3.VM.VMware.Workstation.2.1.5.zip` which is a VM
 to run the qemu instances.
 It is free and you only need to register. There is nothing special to do during
@@ -284,14 +284,15 @@ we select `br0` and click "Add". Then we click "OK".
 Now we add a link between the ASA and the cloud i.e. from "Ethernet 1" on the
 ASA to "br0" on the cloud. Indeed "Ethernet 0" is the management interface.
 
-Now we should be able to ping the Linux machine "192.168.100.1" from the ASA
-and ping the ASA "192.168.100.99" from the Linux host.
+Now we start the ASA device and we should be able to ping the Linux machine 
+"192.168.100.1" from the ASA and ping the ASA "192.168.100.99" from the Linux 
+host.
 
 You should also be able to connect using SSH from the Linux host to the GNS3
 ASA firewall.
 
 To locate the telnet port (that we will use later to connect asadbg/gdb to),
-you can't reply on the one specified in the qemu command line (using
+you can't rely on the one specified in the qemu command line (using
 for instance `ps aux | grep qemu | grep serial`). Instead you can find it
 in the GNS3 project.
 
@@ -304,7 +305,7 @@ It is 5003 instead as found in the .gns3 project (usually in
     "console": 5003,
     "console_type": "telnet",
     ...
-    "name": "ASAv9627-1",
+    "name": "ASAv9815-1",
 ```
 
 Here it is `5003`.
