@@ -308,7 +308,11 @@ It is 5003 instead as found in the .gns3 project (usually in
     "name": "ASAv9815-1",
 ```
 
-Here it is `5003`.
+Here it is `5003`. Another way for finding it is to look at the "Topology
+Summary" window which lists the telnet IP (generally 127.0.01) and TCP 
+port.
+
+![](topology_summary.png)
 
 ### Windows network setup
 
